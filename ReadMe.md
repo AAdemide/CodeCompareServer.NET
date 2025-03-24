@@ -1,6 +1,6 @@
 # CodeCompare
-##Installation instructions
- Please have docker installed and run the following command:   docker run -p 3000:3000 alfaarghya/alfa-leetcode-api:2.0.1
+## Installation instructions
+Please have docker installed and run the following command:   docker run -p 3000:3000 alfaarghya/alfa-leetcode-api:2.0.1
 ## Overview
 
 The app lets you solve coding problems and compare your solutions with AI-generated ones. After submitting your code, the AI analyzes it and provides detailed feedback on improvements. It includes a built-in problem collection, particularly from NeetCode.io, and an optional timer for interview simulations.
