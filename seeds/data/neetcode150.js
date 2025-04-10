@@ -8,7 +8,6 @@ for (const i of slugs) {
     const {data: res} = await axios(`http://localhost:3000/select?titleSlug=${i}`);
 
     resJson.push({
-        leetcode_id: res.questionId,
         question_name: res.questionTitle,
         question_slug: res.titleSlug,
         question_difficulty: res.difficulty,

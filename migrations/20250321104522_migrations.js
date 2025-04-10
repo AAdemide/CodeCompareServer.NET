@@ -4,15 +4,45 @@
  */
 const up = function (knex) {
   return knex.schema
+    .createTable("users", (table) => {
+      table.increments("id").primary();
+      table.string("username").notNullable();
+      table.string("email").notNullable();
+      table.string("password").notNullable();
+    })
+    .createTable("all_questions", (table) => {
+      table.increments("id").primary();
+      table.float("acRate").notNullable();
+      table.string("title").notNullable();
+      table.string("titleSlug").notNullable().unique();
+      table.string("difficulty").notNullable();
+      table.json("topicTags").notNullable();
+      table.boolean("hasSolution").notNullable();
+    })
     .createTable("user_questions", (table) => {
       table.increments("id").primary();
-      table.integer("leetcode_id");
       table.string("question_name");
       table.string("question_slug");
       table.string("question_difficulty");
       table.text("unstructured_question_body");
       table.boolean("structured_question").notNullable();
       table.timestamps(true, true);
+      table
+      .integer("question_id")
+      .unsigned()
+      .notNullable()
+      .references("id")
+      .inTable("all_questions")
+      .onUpdate("CASCADE")
+      .onDelete("CASCADE");
+      table
+      .integer("user_id")
+      .unsigned()
+      .notNullable()
+      .references("id")
+      .inTable("users")
+      .onUpdate("CASCADE")
+      .onDelete("CASCADE");
     })
     .createTable("submissions", (table) => {
       table.increments("id").primary();
@@ -27,14 +57,25 @@ const up = function (knex) {
         .onUpdate("CASCADE")
         .onDelete("CASCADE");
     })
-    .createTable("blind_75_collection", (table) => {
-      table.integer("leetcode_id").primary();
-      table.boolean("done").defaultTo(false);
+    .createTable("collections", (table) => {
+      table.integer("id").primary();
+      table.string("collection_name").notNullable();
+    })
+    .createTable("collection_questions", (table) => {
+      table.integer("question_id").primary();
       table.string("question_name").notNullable();
       table.string("question_slug").notNullable();
       table.string("question_difficulty").notNullable();
-      // table.string("question_tags");
-    });
+      table.json("question_tags");
+      table
+      .integer("collections_id")
+      .unsigned()
+      .notNullable()
+      .references("id")
+      .inTable("collections")
+      .onUpdate("CASCADE")
+      .onDelete("CASCADE");
+    })
 };
 
 /**
@@ -43,9 +84,13 @@ const up = function (knex) {
  */
 const down = function (knex) {
   return knex.schema
+    .dropTable("users")
     .dropTable("submissions")
     .dropTable("user_questions")
-    .dropTable("blind_75_collection");
+    .dropTable("neetcode150_collection")
+    // .dropTable("collection_questions")
+    // .dropTable("collections")
+    .dropTable("all_questions");
 };
 
 export { up, down };

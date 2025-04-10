@@ -31,7 +31,7 @@ router.get("/random", async (_req, res) => {
   try {
     const {
       data: { problemsetQuestionList: problems },
-    } = await axios.get(`${LAPI_URL}/problems?limit=500`);
+    } = await axios.get(`${LAPI_URL}/problems?limit=50`);
     // console.log(problems);
     const randomQuestion =
       problems[Math.floor(Math.random() * problems.length)];
