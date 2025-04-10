@@ -7,7 +7,7 @@ import collections from "./data/collections.json" with {type: "json"};
  */
 
 export async function seed(knex) {
-  let neetcode150_collection = neetcode150.map( async (q, i) => ({
+  let neetcode150_collection = neetcode150.map( async (q) => ({
     ...q,
     id: await knex('all_question').select('id').where({titleSlug: q.question_slug})[0],
     question_tags: JSON.stringify(q.question_tags),

@@ -84,10 +84,10 @@ const up = function (knex) {
  */
 const down = function (knex) {
   return knex.schema
-    .dropTable("users")
-    .dropTable("submissions")
-    .dropTable("user_questions")
-    .dropTable("neetcode150_collection")
+  .dropTable("submissions")
+  .dropTable("user_questions")
+  .dropTable("neetcode150_collection")
+  .dropTable("users")
     // .dropTable("collection_questions")
     // .dropTable("collections")
     .dropTable("all_questions");

@@ -1,7 +1,11 @@
 import fs from "fs";
 import axios from "axios";
+import path from "path";
 
-const slugs = (fs.readFileSync("./leetcode_slugs.txt", "utf8")).split("\n");
+const pathname = path.resolve(import.meta.dirname, "neetcode_slugs.txt")
+const outPathname = path.resolve(import.meta.dirname, "neetcode150_collection_seed.json")
+
+const slugs = (fs.readFileSync(pathname, "utf8")).split("\n");
 let resJson = [];
 
 for (const i of slugs) {
@@ -15,4 +19,4 @@ for (const i of slugs) {
     });
 
 }
-fs.writeFileSync("neetcode150_collection_seed.json", JSON.stringify(resJson, null, 2))
+fs.writeFileSync(outPathname, JSON.stringify(resJson, null, 2))
