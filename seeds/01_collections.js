@@ -1,4 +1,4 @@
-import collections from "./data/collections.json.json" with {type: "json"};
+import collections from "./data/collections.json" with {type: "json"};
 
 /**
  * @param { import("knex").Knex } knex
