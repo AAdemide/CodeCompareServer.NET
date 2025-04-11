@@ -34,9 +34,7 @@ const register = async (req, res) => {
       }
   
       const hashedPassword = await bcrypt.hash(password, 10);
-      const tempUsrObj = { username, email, password: hashedPassword }
-      console.log(tempUsrObj)
-      const newUserID = await knex("users").insert(tempUsrObj);
+      const newUserID = await knex("users").insert({ username, email, password: hashedPassword });
       const newUser = await knex("users").select("*").where({id: newUserID[0]})
       res.status(201).json({...newUser[0], password: undefined});
     } catch (error) {

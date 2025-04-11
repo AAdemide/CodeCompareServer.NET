@@ -29,26 +29,29 @@ router.get("/daily", async (_req, res) => {
 });
 router.get("/random", async (_req, res) => {
   try {
-    const {
-      data: { problemsetQuestionList: problems },
-    } = await axios.get(`${LAPI_URL}/problems?limit=50`);
-    // console.log(problems);
-    const randomQuestion =
-      problems[Math.floor(Math.random() * problems.length)];
-    //get question
-    const { titleSlug: slug } = randomQuestion;
-    const { data: question } = await axios.get(
-      `${LAPI_URL}/select?titleSlug=${slug}`
-    );
+
+    let question;
+    let slug;
+    do{
+      const randomQuestion = (await
+        knex.raw('SELECT * FROM all_questions ORDER BY RAND() LIMIT 1'))[0][0];
+      const { titleSlug } = randomQuestion;
+      const { data } = await axios.get(
+        `${LAPI_URL}/select?titleSlug=${slug}`
+      );
+      question = data
+      slug = titleSlug
+
+    } while(!question?.question?.length)
     if (!question.questionId) {
       return res
         .status(400)
         .json({ message: `Could not find question with titleSlug:  ${slug}` });
     }
     const submissions = await knex
-      .select(["submissions.*", "user_questions.leetcode_id", "user_questions.id"])
+      .select(["submissions.*", "user_questions.question_id", "user_questions.id"])
       .from("submissions")
-      .where({leetcode_id: question.questionId})
+      .where({question_id: question.questionId})
       .join("user_questions", "submissions.user_question_id", "user_questions.id");
     return res.status(200).json({ question, submissions });
   } catch (error) {
