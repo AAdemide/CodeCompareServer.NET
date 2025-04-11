@@ -21,8 +21,6 @@ export async function seed(knex) {
     })
   }
 
-  console.log(neetcode150_collection.length)
-
   await knex("collection_questions").del();
   await knex("collection_questions").insert(neetcode150_collection);
 }
