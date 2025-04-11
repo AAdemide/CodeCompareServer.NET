@@ -1,6 +1,6 @@
 import 'dotenv/config';
 import express from "express";
-import userQuestionsRoute from "./routes/userQuestionsRoute.js";
+import userQuestionsRoute,{userMiddleware} from "./routes/userQuestionsRoute.js";
 import authRoute from "./routes/authRoute.js"
 import lapiRoute from "./routes/lapiRoute.js";
 import cors from 'cors';
@@ -17,6 +17,7 @@ app.get("/", (_req, res) => {
 });
 
 app.use("/auth", authRoute);
+app.use("/userQuestions", userMiddleware)
 app.use("/userQuestions", userQuestionsRoute);
 app.use("/lapi", lapiRoute);
 

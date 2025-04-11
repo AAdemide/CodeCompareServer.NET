@@ -2,9 +2,9 @@ import initKnex from "knex";
 import configuration from "../knexfile.js";
 const knex = initKnex(configuration);
 
-const index = async (_req, res) => {
+const index = async (req, res) => {
   try {
-    let questions = await knex.select("*").from("user_questions");
+    let questions = await knex.select("*").from("user_questions").where({id: req.id});
     res.status(200).json(questions);
   } catch (error) {
     console.error(`Error retrieving questions:${error}`);

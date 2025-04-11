@@ -54,7 +54,7 @@ const register = async (req, res) => {
       //to validate password ->  [returns true/false]
       if (await bcrypt.compare(password, user[0].password)) {
         const token = jwt.sign({
-          username: user[0].username,
+          id: user[0].id
         }, process.env.ACCESS_TOKEN_SECRET)
         return res.status(200).json({token, id: user[0].id})
       }
