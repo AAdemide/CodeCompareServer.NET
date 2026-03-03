@@ -16,6 +16,7 @@ const addOne = async (req, res) => {
   try {
     const {
       structured_question,
+      leetcode_id,
       question_name,
       question_slug,
       question_difficulty,
@@ -25,6 +26,7 @@ const addOne = async (req, res) => {
     let newQuestion;
     if (structured_question) {
       if (
+        !leetcode_id ||
         !question_name ||
         !question_slug ||
         !question_difficulty ||
@@ -32,12 +34,9 @@ const addOne = async (req, res) => {
       ) {
         return res.status(400).send("All fields are required");
       }
-      const question_id = (await knex('all_questions').select('id').where({titleSlug: question_slug}))[0]
-
-      if(!question_id) return res.status(400).json({message: 'could not find question'});
-
+      //do a get here to check if leetcode_id in user_question if so do not add a new question
       let newQuestionId = await knex("user_questions").insert({
-        question_id,
+        leetcode_id,
         question_name,
         question_slug,
         question_difficulty,
@@ -53,8 +52,7 @@ const addOne = async (req, res) => {
       let newQuestionId = await knex("user_questions").insert({
         question_name,
         unstructured_question_body,
-        structured_question: false,
-        user_id
+        structured_question,
       });
       newQuestion = await knex("user_questions").where({
         id: newQuestionId[0],
