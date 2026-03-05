@@ -1,0 +1,6 @@
+<Solution>
+  <Folder Name="/Tests/">
+    <Project Path="Tests/CodeCompareServer.Tests.csproj" />
+  </Folder>
+  <Project Path="CodeCompareServer.csproj" />
+</Solution>

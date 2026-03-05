@@ -1,0 +1,48 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {},
+    "resources": [
+        {
+            "type": "Microsoft.DBforMySQL/flexibleServers",
+            "apiVersion": "2023-06-30",
+            "name": "codecompare-mysql-server",
+            "location": "centralus",
+            "sku": {
+                "name": "Standard_B1ms",
+                "tier": "Burstable"
+            },
+            "properties": {
+                "administratorLogin": "codeadmin",
+                "administratorLoginPassword": "DBCodeCompare123!",
+                "version": "8.0.21"
+            },
+            "resources": [
+                {
+                    "type": "firewallRules",
+                    "apiVersion": "2023-06-30",
+                    "name": "AllowAll",
+                    "dependsOn": [
+                        "[resourceId('Microsoft.DBforMySQL/flexibleServers', 'codecompare-mysql-server')]"
+                    ],
+                    "properties": {
+                        "startIpAddress": "0.0.0.0",
+                        "endIpAddress": "255.255.255.255"
+                    }
+                },
+                {
+                    "type": "databases",
+                    "apiVersion": "2023-06-30",
+                    "name": "codecompare",
+                    "dependsOn": [
+                        "[resourceId('Microsoft.DBforMySQL/flexibleServers', 'codecompare-mysql-server')]"
+                    ],
+                    "properties": {
+                        "charset": "utf8",
+                        "collation": "utf8_general_ci"
+                    }
+                }
+            ]
+        }
+    ]
+}
