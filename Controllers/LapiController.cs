@@ -40,7 +40,7 @@ public class LapiController : ControllerBase
             response.EnsureSuccessStatusCode();
             var json = await response.Content.ReadAsStringAsync();
             using var document = JsonDocument.Parse(json);
-            if (document.RootElement.TryGetProperty("data", out var data) && 
+            if (document.RootElement.TryGetProperty("data", out var data) &&
                 data.TryGetProperty("activeDailyCodingChallengeQuestion", out var dailyQuestion))
             {
                 return Ok(dailyQuestion);
@@ -56,8 +56,11 @@ public class LapiController : ControllerBase
 
     [HttpGet("random")]
     public async Task<IActionResult> RandomQuestion()
+{
+    try
     {
-        try
+        int maxRetries = 7;
+        for (int i = 0; i < maxRetries; i++)
         {
             var randomQuestion = await _context.AllQuestions
                 .OrderBy(q => EF.Functions.Random())
@@ -69,6 +72,23 @@ public class LapiController : ControllerBase
             response.EnsureSuccessStatusCode();
             var json = await response.Content.ReadAsStringAsync();
             using var document = JsonDocument.Parse(json);
+
+            if (!document.RootElement.TryGetProperty("question", out var questionProp) ||
+                questionProp.ValueKind == JsonValueKind.Null)
+            {
+                Console.WriteLine($"Question {randomQuestion.TitleSlug} returned null question, retrying...");
+                continue;
+            }
+
+            if (document.RootElement.TryGetProperty("topicTags", out var topicTags) &&
+                topicTags.EnumerateArray().Any(t =>
+                    t.TryGetProperty("slug", out var slug) &&
+                    slug.GetString() == "database"))
+            {
+                Console.WriteLine($"Question {randomQuestion.TitleSlug} is a DB question, retrying...");
+                continue;
+            }
+
             var questionElement = document.RootElement.Clone();
             var submissions = await _context.Submissions
                 .Include(s => s.UserQuestion)
@@ -82,13 +102,15 @@ public class LapiController : ControllerBase
 
             return Ok(new { question = questionElement, submissions });
         }
-        catch (Exception ex)
-        {
-            Console.Error.WriteLine("There was an error retrieving a random question: " + ex);
-            return StatusCode(500, new { message = $"There was an error retrieving a random question:  {ex.Message}" });
-        }
-    }
 
+        return StatusCode(503, new { message = "Could not find a valid question after multiple attempts" });
+    }
+    catch (Exception ex)
+    {
+        Console.Error.WriteLine("There was an error retrieving a random question: " + ex);
+        return StatusCode(500, new { message = $"There was an error retrieving a random question: {ex.Message}" });
+    }
+}
     [Authorize]
     [HttpGet("{slug}")]
     public async Task<IActionResult> GetBySlug(string slug)
@@ -100,7 +122,7 @@ public class LapiController : ControllerBase
             {
                 return BadRequest(new { message = $"Could not find question with titleSlug:  {slug}" });
             }
-            
+
             var json = await response.Content.ReadAsStringAsync();
             using var document = JsonDocument.Parse(json);
             var questionElement = document.RootElement.Clone();
@@ -117,7 +139,7 @@ public class LapiController : ControllerBase
 
                 return Ok(new { userQuestionId = userQuestion.Id, question = questionElement, submissions });
             }
-            
+
             return Ok(new { userQuestionId = (int?)null, question = questionElement, submissions = new object[0] });
         }
         catch (Exception ex)
