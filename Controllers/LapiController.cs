@@ -69,7 +69,7 @@ public class LapiController : ControllerBase
             response.EnsureSuccessStatusCode();
             var json = await response.Content.ReadAsStringAsync();
             using var document = JsonDocument.Parse(json);
-            
+            var questionElement = document.RootElement.Clone();
             var submissions = await _context.Submissions
                 .Include(s => s.UserQuestion)
                 .Where(s => s.UserQuestion.QuestionId == randomQuestion.Id)
@@ -80,7 +80,7 @@ public class LapiController : ControllerBase
                 })
                 .ToListAsync();
 
-            return Ok(new { question = document.RootElement, submissions });
+            return Ok(new { question = questionElement, submissions });
         }
         catch (Exception ex)
         {
@@ -103,6 +103,7 @@ public class LapiController : ControllerBase
             
             var json = await response.Content.ReadAsStringAsync();
             using var document = JsonDocument.Parse(json);
+            var questionElement = document.RootElement.Clone();
 
             var userId = GetUserId();
             var userQuestion = await _context.UserQuestions
@@ -114,10 +115,10 @@ public class LapiController : ControllerBase
                     .Where(s => s.UserQuestionId == userQuestion.Id)
                     .ToListAsync();
 
-                return Ok(new { userQuestionId = userQuestion.Id, question = document.RootElement, submissions });
+                return Ok(new { userQuestionId = userQuestion.Id, question = questionElement, submissions });
             }
             
-            return Ok(new { userQuestionId = (int?)null, question = document.RootElement, submissions = new object[0] });
+            return Ok(new { userQuestionId = (int?)null, question = questionElement, submissions = new object[0] });
         }
         catch (Exception ex)
         {

@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Authorization;
+using System.Text.Json.Serialization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using CodeCompareServer.Data;
@@ -8,7 +9,7 @@ namespace CodeCompareServer.Controllers;
 
 [ApiController]
 [Route("userQuestions")]
-[Authorize]
+// [Authorize]
 public class UserQuestionsController : ControllerBase
 {
     private readonly AppDbContext _context;
@@ -42,15 +43,19 @@ public class UserQuestionsController : ControllerBase
         }
     }
 
-    public record AddQuestionRequest(bool StructuredQuestion, string? QuestionName, string? QuestionSlug, string? QuestionDifficulty, string? UnstructuredQuestionBody);
+    public record AddQuestionRequest(
+        [property: JsonPropertyName("structured_question")] bool StructuredQuestion,
+        [property: JsonPropertyName("question_name")] string? QuestionName,
+        [property: JsonPropertyName("question_slug")] string? QuestionSlug,
+        [property: JsonPropertyName("question_difficulty")] string? QuestionDifficulty,
+        [property: JsonPropertyName("unstructured_question_body")] string? UnstructuredQuestionBody
+    );
 
     [HttpPost]
     public async Task<IActionResult> AddOne([FromBody] AddQuestionRequest req)
     {
         try
         {
-            var userId = GetUserId();
-            UserQuestion newQuestion;
 
             if (req.StructuredQuestion)
             {
@@ -58,7 +63,20 @@ public class UserQuestionsController : ControllerBase
                 {
                     return BadRequest("All fields are required");
                 }
+            }
+            else
+            {
+                if (string.IsNullOrEmpty(req.UnstructuredQuestionBody) || string.IsNullOrEmpty(req.QuestionName))
+                {
+                    return BadRequest("All fields are required");
+                }
+            }
 
+            var userId = GetUserId();
+            UserQuestion newQuestion;
+
+            if (req.StructuredQuestion)
+            {
                 var allQuestion = await _context.AllQuestions.FirstOrDefaultAsync(q => q.TitleSlug == req.QuestionSlug);
                 if (allQuestion == null) return BadRequest(new { message = "could not find question" });
 
@@ -73,15 +91,9 @@ public class UserQuestionsController : ControllerBase
                     CreatedAt = DateTime.UtcNow,
                     UpdatedAt = DateTime.UtcNow
                 };
-                _context.UserQuestions.Add(newQuestion);
-                await _context.SaveChangesAsync();
             }
             else
             {
-                if (string.IsNullOrEmpty(req.UnstructuredQuestionBody) || string.IsNullOrEmpty(req.QuestionName))
-                {
-                    return BadRequest("All fields are required");
-                }
                 newQuestion = new UserQuestion
                 {
                     QuestionName = req.QuestionName,
@@ -91,10 +103,11 @@ public class UserQuestionsController : ControllerBase
                     CreatedAt = DateTime.UtcNow,
                     UpdatedAt = DateTime.UtcNow
                 };
-                _context.UserQuestions.Add(newQuestion);
-                await _context.SaveChangesAsync();
             }
 
+            _context.UserQuestions.Add(newQuestion);
+            await _context.SaveChangesAsync();
+            Console.WriteLine($"4 Question saved with id: {newQuestion.Id}");
             return StatusCode(201, newQuestion);
         }
         catch (Exception ex)
@@ -103,7 +116,6 @@ public class UserQuestionsController : ControllerBase
             return BadRequest(new { message = $"Unable to create new one: {ex.Message}" });
         }
     }
-
     [HttpGet("{id}")]
     public async Task<IActionResult> GetOne(int id)
     {
@@ -128,11 +140,16 @@ public class UserQuestionsController : ControllerBase
         }
     }
 
-    public record AddSubmissionRequest(string SubmissionAnalyses);
+    public record AddSubmissionRequest(
+        [property: JsonPropertyName("submission_analyses")] string SubmissionAnalyses
+    );
 
     [HttpPost("{id}/submission")]
     public async Task<IActionResult> AddSubmission(int id, [FromBody] AddSubmissionRequest req)
     {
+        Console.WriteLine("=====================================================");
+        Console.WriteLine($"1 Request received: {System.Text.Json.JsonSerializer.Serialize(req)}");
+
         try
         {
             var newSubmission = new Submission
@@ -141,7 +158,7 @@ public class UserQuestionsController : ControllerBase
                 SubmissionAnalyses = req.SubmissionAnalyses,
                 CreatedAt = DateTime.UtcNow
             };
-            
+
             _context.Submissions.Add(newSubmission);
             await _context.SaveChangesAsync();
 
