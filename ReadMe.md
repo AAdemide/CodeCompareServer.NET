@@ -113,25 +113,13 @@ The problem space this app addresses involves several key challenges that develo
 - CodeMirror IDE or Monaco Editor
 
 #### Back End
-- NodeJs
-- Express
-- axios
-- knex.js
-- AI API ...still deciding
+- .Net
+- Entity Framework 
+- Gemini API
 
 
 ### APIs
 - AI API ...still deciding
-
-### Sitemap
-
-- Homepage
-- List of my solutions and related questions
-
-### Mockups
-
-![alt text](image.png)
-![alt text](image-1.png)
 
 ### Data
 
